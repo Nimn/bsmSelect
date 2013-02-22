@@ -194,6 +194,7 @@
      * @param {jQuery} $bsmOpt Option from the new select
      */
     disableSelectOption: function($bsmOpt) {
+      if (this.options.cloneOption) return;
       $bsmOpt.addClass(this.options.optionDisabledClass)
         .removeAttr('selected')
         .attr('disabled', 'disabled')
@@ -225,10 +226,15 @@
 
       if (!$origOpt) { return; } // this is the first item, selectLabel
 
+      var cloned = null;
       if (!this.buildingSelect) {
-        if ($origOpt.is(':selected')) { return; } // already have it
-        $origOpt.attr('selected', 'selected');
-      }
+        if ($origOpt.is(':selected')) { // already have it
+            if (!o.cloneOption) return;
+            cloned = $origOpt.clone();
+        } else {
+            $origOpt.attr('selected', 'selected');
+        }
+     }
 
       $item = $('<li>', { 'class': o.listItemClass })
         .append($('<span>', { 'class': o.listItemLabelClass, html: o.extractLabel($bsmOpt, o)}))
@@ -240,20 +246,30 @@
       switch (o.addItemTarget) {
         case 'bottom':
           this.$list.append($item.hide());
+          if (cloned) $origOpt.parent().append(cloned);
           break;
         case 'original':
           var order = $origOpt.data('bsm-order'), inserted = false;
           $('.' + o.listItemClass, this.$list).each(function() {
             if (order < $(this).data('bsm-option').data('orig-option').data('bsm-order')) {
               $item.hide().insertBefore(this);
+              if (cloned){
+                // TODO: need to be fixed...
+                $origOpt.before(cloned);
+                //$origOpt.parent().children('option:nth-child('+order+')').before(cloned);
+              }
               inserted = true;
               return false;
             }
           });
-          if (!inserted) { this.$list.append($item.hide()); }
+          if (!inserted) {
+            this.$list.append($item.hide());
+            if (cloned) $origOpt.parent().append(cloned);
+          }
           break;
         default:
           this.$list.prepend($item.hide());
+          if (cloned) $origOpt.parent().prepend(cloned);
       }
 
       if (this.buildingSelect) {
@@ -358,6 +374,7 @@
 
     addItemTarget: 'bottom',                    // Where to place new selected items in list: top or bottom
     hideWhenAdded: false,                       // Hide the option when added to the list? works only in FF
+    cloneOption: false,                         // Allow selection of the same option several times
     debugMode: false,                           // Debug mode keeps original select visible
 
     title: 'Select...',                         // Text used for the default select label

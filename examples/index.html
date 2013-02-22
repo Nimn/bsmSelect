@@ -124,6 +124,15 @@
         extractLabel: function($o) {return $o.parents('optgroup').attr('label') + "&nbsp;>&nbsp;" + $o.html();}
       });
 
+      // Example 6
+      $("#cities6").bsmSelect({
+        addItemTarget: 'original',
+        animate: true,
+        highlight: true,
+        cloneOption: true,
+        plugins: [$.bsmSelect.plugins.sortable(), $.bsmSelect.plugins.compatibility()]
+      });
+
     });
 
   //]]></script>
@@ -239,6 +248,18 @@
     </select>
     <p style="clear:both;"><input type="submit" name="submit" value="submit" /></p>
   </form>
+  
+  <h1>Example 6: Select the same item several times</h1>
+
+  <form action="./example_results.php" method="post">
+
+    <label for="cities6">What are your favorite cities?</label>
+    <select id="cities6" multiple="multiple" name="cities[]" title="Click to Select a City" class="sminit">
+      <option>Amsterdam</option>
+    </select>
+    <p><input type="submit" name="submit" value="submit" /></p>
+  </form>
+
 
   <ul id='footer'>
     <li><a href="http://github.com/vicb/bsmSelect">bsmSelect project on GitHub</a></li>

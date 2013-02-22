@@ -41,6 +41,11 @@
         info.option.detach()[bsm.options.addItemTarget === 'top' ? 'prependTo' : 'appendTo'](bsm.$original);
         bsm.$list.sortable('refresh');
       }
+      if (bsm.options.cloneOption){
+        $('.' + bsm.options.listItemClass, bsm.$list).each(function() {
+            $(this).data('bsm-option').data('orig-option').detach().appendTo(bsm.$original);
+        });
+      }
     },
 
     onSort: function(bsm, e, ui) {

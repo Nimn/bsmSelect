@@ -106,6 +106,11 @@ The newly created select default option is the original select title attribute:
   * A function to compute the list element name from the option object
   * Default: extract the option html
 
+* cloneOption:
+
+  * Allow selection of the same option several times.
+  * Default: false
+
 * plugins
 
   * An array of plugins objects to enable (they only are required to have an `init`
