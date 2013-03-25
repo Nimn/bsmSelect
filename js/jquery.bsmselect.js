@@ -124,7 +124,6 @@
      */
     buildSelect: function() {
       var self = this;
-
       this.buildingSelect = true;
 
       // add a first option to be the home option / default selectLabel
@@ -230,23 +229,29 @@
       if (!this.buildingSelect) {
         if ($origOpt.is(':selected')) { // already have it
             if (!o.cloneOption) return;
-            cloned = $origOpt.clone();
+            cloned = true;
         } else {
             $origOpt.attr('selected', 'selected');
         }
-     }
-
+      }
       $item = $('<li>', { 'class': o.listItemClass })
         .append($('<span>', { 'class': o.listItemLabelClass, html: o.extractLabel($bsmOpt, o)}))
-        .append($('<a>', { href: '#', 'class': o.removeClass, html: o.removeLabel }))
-        .data('bsm-option', $bsmOpt);
-
+        .append($('<a>', { href: '#', 'class': o.removeClass, html: o.removeLabel }));
+      if(cloned){
+        $item.data('bsm-option', $bsmOpt.clone(true).data('cloned', true));
+        $item.data('bsm-option').data('orig-option',
+                     $item.data('bsm-option').data('orig-option').clone());
+      } else {
+        $item.data('bsm-option', $bsmOpt);
+      }
       this.disableSelectOption($bsmOpt.data('item', $item));
 
       switch (o.addItemTarget) {
         case 'bottom':
           this.$list.append($item.hide());
-          if (cloned) $origOpt.parent().append(cloned);
+          if (cloned){
+            $origOpt.parent().append($item.data('bsm-option').data('orig-option').detach());
+          }
           break;
         case 'original':
           var order = $origOpt.data('bsm-order'), inserted = false;
@@ -255,7 +260,7 @@
               $item.hide().insertBefore(this);
               if (cloned){
                 // TODO: need to be fixed...
-                $origOpt.before(cloned);
+                $origOpt.before($item.data('bsm-option').data('orig-option').detach());
                 //$origOpt.parent().children('option:nth-child('+order+')').before(cloned);
               }
               inserted = true;
@@ -264,12 +269,14 @@
           });
           if (!inserted) {
             this.$list.append($item.hide());
-            if (cloned) $origOpt.parent().append(cloned);
+            //if (cloned) $origOpt.parent().append(cloned);
           }
           break;
         default:
           this.$list.prepend($item.hide());
-          if (cloned) $origOpt.parent().prepend(cloned);
+          if (cloned){
+            $origOpt.parent().prepend($item.data('bsm-option').data('orig-option').detach());
+          }
       }
 
       if (this.buildingSelect) {
@@ -289,6 +296,10 @@
     dropListItem: function($item) {
       var $bsmOpt = $item.data('bsm-option'), o = this.options;
       $bsmOpt.removeData('item').data('orig-option').removeAttr('selected');
+      if($bsmOpt.data('cloned')){
+        $bsmOpt.data('orig-option').remove();
+        $bsmOpt.remove();
+      }
       (this.buildingSelect ? $.bsmSelect.effects.remove : o.hideEffect)($item);
       this.enableSelectOption($bsmOpt);
       o.highlightEffect(this.$select, $item, o.highlightRemovedLabel, o);
